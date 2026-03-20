@@ -1,4 +1,4 @@
-const API_URL = "http://omw/api/latest";
+const API_URL = "https://isogonally-optical-katharine.ngrok-free.dev/api/latest";
 
 async function fetchSensorData() {
   try {
