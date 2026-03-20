@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Room Camera</title>
+  <title>Room Camera Stream</title>
   <link rel="stylesheet" href="style.css" />
   <style>
     .camera-wrap {
-      max-width: 900px;
+      max-width: 1000px;
       margin: 0 auto;
       padding: 30px 20px;
     }
@@ -55,12 +55,13 @@
       opacity: 0.9;
     }
 
-    #cameraImage {
+    #cameraStream {
       width: 100%;
       max-width: 100%;
       border-radius: 16px;
       display: none;
       margin-top: 15px;
+      background: #000;
     }
 
     #cameraStatus {
@@ -74,20 +75,20 @@
   <div class="camera-wrap">
     <a class="back-link" href="index.html">← Back to Dashboard</a>
 
-    <h1 style="margin-top:20px;">Private Room Camera</h1>
-    <p class="subtitle">Protected snapshot view from your Raspberry Pi USB camera</p>
+    <h1 style="margin-top:20px;">Private Room Camera Stream</h1>
+    <p class="subtitle">Live USB camera stream from Raspberry Pi</p>
 
     <div class="camera-box">
       <label for="cameraPassword">Camera Password</label>
       <input type="password" id="cameraPassword" placeholder="Enter camera password" />
 
       <div class="camera-actions">
-        <button onclick="captureImage()">Capture Snapshot</button>
-        <button onclick="loadLatestImage()">Load Latest Image</button>
+        <button onclick="startStream()">Start Stream</button>
+        <button onclick="stopStream()">Stop Stream</button>
       </div>
 
-      <p id="cameraStatus">Waiting for action...</p>
-      <img id="cameraImage" alt="Room Camera Snapshot" />
+      <p id="cameraStatus">Waiting to start stream...</p>
+      <img id="cameraStream" alt="Live Room Camera Stream" />
     </div>
   </div>
 
