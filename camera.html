@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Room Camera</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .camera-wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+
+    .camera-box {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(8px);
+      margin-top: 20px;
+    }
+
+    .camera-box input {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      font-size: 1rem;
+    }
+
+    .camera-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .camera-actions button,
+    .back-link {
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .camera-actions button:hover,
+    .back-link:hover {
+      opacity: 0.9;
+    }
+
+    #cameraImage {
+      width: 100%;
+      max-width: 100%;
+      border-radius: 16px;
+      display: none;
+      margin-top: 15px;
+    }
+
+    #cameraStatus {
+      margin-top: 10px;
+      color: #fcd34d;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="camera-wrap">
+    <a class="back-link" href="index.html">← Back to Dashboard</a>
+
+    <h1 style="margin-top:20px;">Private Room Camera</h1>
+    <p class="subtitle">Protected snapshot view from your Raspberry Pi USB camera</p>
+
+    <div class="camera-box">
+      <label for="cameraPassword">Camera Password</label>
+      <input type="password" id="cameraPassword" placeholder="Enter camera password" />
+
+      <div class="camera-actions">
+        <button onclick="captureImage()">Capture Snapshot</button>
+        <button onclick="loadLatestImage()">Load Latest Image</button>
+      </div>
+
+      <p id="cameraStatus">Waiting for action...</p>
+      <img id="cameraImage" alt="Room Camera Snapshot" />
+    </div>
+  </div>
+
+  <script src="camera.js"></script>
+</body>
+</html>
