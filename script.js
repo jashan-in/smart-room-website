@@ -19,6 +19,12 @@ async function fetchSensorData() {
     document.getElementById("motion").textContent =
       data.motion || "No motion data";
 
+    document.getElementById("lightStatus").textContent =
+      data.light_status || "No light data";
+
+    document.getElementById("lightLevel").textContent =
+      data.light_level !== null ? `Raw light value: ${data.light_level}` : "--";
+
     document.getElementById("device").textContent =
       data.device || "--";
 

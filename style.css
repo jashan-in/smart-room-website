@@ -48,9 +48,16 @@ h1 {
 }
 
 .card p {
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   font-weight: bold;
   line-height: 1.4;
+}
+
+.card small {
+  display: block;
+  margin-top: 10px;
+  color: #cbd5e1;
+  font-size: 0.9rem;
 }
 
 .full-width {
@@ -60,8 +67,4 @@ h1 {
 #status {
   font-size: 1.1rem;
   color: #fcd34d;
-}
-
-#motion {
-  font-size: 1.1rem;
 }
