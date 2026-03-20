@@ -37,4 +37,4 @@ async function fetchSensorData() {
 }
 
 fetchSensorData();
-setInterval(fetchSensorData, 5000);
+setInterval(fetchSensorData, 1000);
