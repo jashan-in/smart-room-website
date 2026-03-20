@@ -2,7 +2,12 @@ const API_URL = "https://isogonally-optical-katharine.ngrok-free.dev/api/latest"
 
 async function fetchSensorData() {
   try {
-    const response = await fetch(API_URL);
+    const response = await fetch(API_URL, {
+      headers: {
+        "ngrok-skip-browser-warning": "true"
+      }
+    });
+
     const data = await response.json();
 
     document.getElementById("temperature").textContent =
