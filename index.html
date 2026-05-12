@@ -3,70 +3,109 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Room Dashboard</title>
+  <title>Room Monitor</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
 </head>
 <body>
-  <div class="container">
-    <h1>Smart Room Dashboard</h1>
-    <p class="subtitle">Live ESP32 room monitoring</p>
+  <div class="noise"></div>
 
-    <div style="margin-bottom: 20px;">
-      <a
-        href="camera.html"
-        style="
-          background:#2563eb;
-          color:white;
-          padding:12px 18px;
-          border-radius:12px;
-          text-decoration:none;
-          display:inline-block;
-          font-weight:bold;
-        "
-      >
-        Open Private Camera
-      </a>
-    </div>
-
-    <div class="dashboard">
-      <div class="card">
-        <h2>Temperature</h2>
-        <p id="temperature">-- °C</p>
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-dot" id="statusDot"></span>
+        <span class="logo-text">ROOM_MONITOR</span>
       </div>
-
-      <div class="card">
-        <h2>Humidity</h2>
-        <p id="humidity">-- %</p>
-      </div>
-
-      <div class="card">
-        <h2>Motion</h2>
-        <p id="motion">Checking motion...</p>
-      </div>
-
-      <div class="card">
-        <h2>Light</h2>
-        <p id="lightStatus">Checking light...</p>
-        <small id="lightLevel">--</small>
-      </div>
-
-      <div class="card">
-        <h2>Device</h2>
-        <p id="device">--</p>
-      </div>
-
-      <div class="card">
-        <h2>Last Update</h2>
-        <p id="timestamp">--</p>
-      </div>
-
-      <div class="card full-width">
-        <h2>Status</h2>
-        <p id="status">Waiting for data...</p>
+      <div class="header-meta">
+        <span class="chip" id="deviceStatus">OFFLINE</span>
+        <span class="timestamp" id="lastUpdate">—</span>
       </div>
     </div>
-  </div>
+  </header>
 
+  <main>
+    <section class="grid-primary">
+      <div class="card card--temp" id="cardTemp">
+        <div class="card-label">TEMPERATURE</div>
+        <div class="card-value">
+          <span id="tempValue">—</span>
+          <span class="card-unit">°C</span>
+        </div>
+        <div class="card-bar">
+          <div class="card-bar-fill" id="tempBar"></div>
+        </div>
+        <div class="card-range">0°C <span>50°C</span></div>
+      </div>
+
+      <div class="card card--humid" id="cardHumid">
+        <div class="card-label">HUMIDITY</div>
+        <div class="card-value">
+          <span id="humidValue">—</span>
+          <span class="card-unit">%</span>
+        </div>
+        <div class="card-bar">
+          <div class="card-bar-fill" id="humidBar"></div>
+        </div>
+        <div class="card-range">0% <span>100%</span></div>
+      </div>
+
+      <div class="card card--light" id="cardLight">
+        <div class="card-label">LIGHT LEVEL</div>
+        <div class="card-value">
+          <span id="lightValue">—</span>
+          <span class="card-unit">/ 4095</span>
+        </div>
+        <div class="card-bar">
+          <div class="card-bar-fill" id="lightBar"></div>
+        </div>
+        <div class="card-range">Dark <span>Bright</span></div>
+      </div>
+    </section>
+
+    <section class="grid-secondary">
+      <div class="card card--motion">
+        <div class="card-label">MOTION</div>
+        <div class="motion-indicator" id="motionIndicator">
+          <div class="motion-ring"></div>
+          <div class="motion-ring"></div>
+          <span class="motion-text" id="motionText">CLEAR</span>
+        </div>
+      </div>
+
+      <div class="card card--led">
+        <div class="card-label">LED CONTROL</div>
+        <div class="led-control">
+          <div class="led-orb" id="ledOrb"></div>
+          <div class="led-info">
+            <span class="led-status" id="ledStatusText">OFF</span>
+            <span class="led-sub">Physical LED on GPIO 2</span>
+          </div>
+          <button class="led-btn" id="ledToggleBtn" onclick="toggleLED()">
+            <span id="ledBtnLabel">TURN ON</span>
+          </button>
+        </div>
+        <div class="led-feedback" id="ledFeedback"></div>
+      </div>
+    </section>
+
+    <section class="history-section">
+      <div class="history-header">
+        <span class="history-title">SENSOR HISTORY</span>
+        <span class="history-sub">last 20 readings</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="historyChart"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>ESP32-S3 · MicroPython · Railway · Flask</span>
+    <span id="fetchStatus">Fetching…</span>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

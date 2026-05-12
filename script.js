@@ -1,46 +1,238 @@
-const API_URL = "https://web-production-b5ec9.up.railway.app/api/latest";
-
-async function fetchSensorData() {
+const API_BASE = 'https://backend-railway-production-298d.up.railway.app';
+const POLL_INTERVAL = 3000;
+const MAX_HISTORY = 20;
+ 
+let ledState = false;
+let ledTogglePending = false;
+let history = { labels: [], temp: [], humid: [], light: [] };
+let chart = null;
+ 
+// ── Chart init ────────────────────────────────────────────
+function initChart() {
+  const ctx = document.getElementById('historyChart').getContext('2d');
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [
+        {
+          label: 'Temp (°C)',
+          data: [],
+          borderColor: '#e07a3a',
+          backgroundColor: 'rgba(224,122,58,0.06)',
+          borderWidth: 1.5,
+          pointRadius: 0,
+          tension: 0.4,
+          fill: true,
+        },
+        {
+          label: 'Humidity (%)',
+          data: [],
+          borderColor: '#4ea8d2',
+          backgroundColor: 'rgba(78,168,210,0.06)',
+          borderWidth: 1.5,
+          pointRadius: 0,
+          tension: 0.4,
+          fill: true,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          labels: {
+            color: '#555',
+            font: { family: 'Space Mono', size: 9 },
+            boxWidth: 12,
+            padding: 16,
+          },
+        },
+        tooltip: {
+          backgroundColor: '#1c1c1c',
+          borderColor: '#2a2a2a',
+          borderWidth: 1,
+          titleColor: '#888',
+          bodyColor: '#e8e4dc',
+          titleFont: { family: 'Space Mono', size: 9 },
+          bodyFont: { family: 'Space Mono', size: 10 },
+          padding: 10,
+        },
+      },
+      scales: {
+        x: {
+          grid: { color: '#1c1c1c' },
+          ticks: {
+            color: '#555',
+            font: { family: 'Space Mono', size: 8 },
+            maxTicksLimit: 6,
+            maxRotation: 0,
+          },
+        },
+        y: {
+          grid: { color: '#1c1c1c' },
+          ticks: {
+            color: '#555',
+            font: { family: 'Space Mono', size: 8 },
+          },
+        },
+      },
+    },
+  });
+}
+ 
+function pushHistory(label, temp, humid, light) {
+  history.labels.push(label);
+  history.temp.push(temp);
+  history.humid.push(humid);
+  history.light.push(light);
+  if (history.labels.length > MAX_HISTORY) {
+    history.labels.shift();
+    history.temp.shift();
+    history.humid.shift();
+    history.light.shift();
+  }
+  chart.data.labels = history.labels;
+  chart.data.datasets[0].data = history.temp;
+  chart.data.datasets[1].data = history.humid;
+  chart.update('none');
+}
+ 
+// ── DOM helpers ───────────────────────────────────────────
+function setBar(id, pct) {
+  document.getElementById(id).style.width = Math.min(100, Math.max(0, pct)) + '%';
+}
+ 
+function setLEDUI(isOn) {
+  ledState = isOn;
+  const orb = document.getElementById('ledOrb');
+  const statusText = document.getElementById('ledStatusText');
+  const btnLabel = document.getElementById('ledBtnLabel');
+  const btn = document.getElementById('ledToggleBtn');
+ 
+  orb.classList.toggle('on', isOn);
+  statusText.textContent = isOn ? 'ON' : 'OFF';
+  statusText.classList.toggle('on', isOn);
+  btnLabel.textContent = isOn ? 'TURN OFF' : 'TURN ON';
+  btn.classList.toggle('led-on-state', isOn);
+}
+ 
+function setFeedback(msg, type = '') {
+  const el = document.getElementById('ledFeedback');
+  el.textContent = msg;
+  el.className = 'led-feedback ' + type;
+}
+ 
+function formatTime(isoStr) {
   try {
-    const response = await fetch(API_URL, {
-      headers: {
-        "ngrok-skip-browser-warning": "true"
-      }
-    });
-
-    const data = await response.json();
-
-    document.getElementById("temperature").textContent =
-      data.temperature !== null ? `${data.temperature} °C` : "-- °C";
-
-    document.getElementById("humidity").textContent =
-      data.humidity !== null ? `${data.humidity} %` : "-- %";
-
-    document.getElementById("motion").textContent =
-      data.motion || "No motion data";
-
-    document.getElementById("lightStatus").textContent =
-      data.light_status || "No light data";
-
-    document.getElementById("lightLevel").textContent =
-      data.light_level !== null ? `Raw light value: ${data.light_level}` : "--";
-
-    document.getElementById("device").textContent =
-      data.device || "--";
-
-    if (data.timestamp) {
-      const date = new Date(data.timestamp);
-      document.getElementById("timestamp").textContent = date.toLocaleString();
-      document.getElementById("status").textContent = "Live room data received successfully";
-    } else {
-      document.getElementById("timestamp").textContent = "--";
-      document.getElementById("status").textContent = "No sensor data yet";
-    }
-  } catch (error) {
-    console.error("Error fetching sensor data:", error);
-    document.getElementById("status").textContent = "Failed to connect to backend";
+    const d = new Date(isoStr);
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  } catch {
+    return isoStr;
   }
 }
-
-fetchSensorData();
-setInterval(fetchSensorData, 1000);
+ 
+function setOnline(online) {
+  const dot = document.getElementById('statusDot');
+  const chip = document.getElementById('deviceStatus');
+  dot.classList.toggle('online', online);
+  chip.classList.toggle('online', online);
+  chip.textContent = online ? 'ONLINE' : 'OFFLINE';
+}
+ 
+// ── Sensor fetch ──────────────────────────────────────────
+async function fetchSensorData() {
+  try {
+    const res = await fetch(`${API_BASE}/api/latest`, { signal: AbortSignal.timeout(5000) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+ 
+    const temp = parseFloat(data.temperature);
+    const humid = parseFloat(data.humidity);
+    const light = parseInt(data.light_level, 10);
+    const motion = data.motion === true || data.motion === 'true' || data.motion === 1;
+    const ts = data.timestamp || '';
+ 
+    document.getElementById('tempValue').textContent = isNaN(temp) ? '—' : temp.toFixed(1);
+    document.getElementById('humidValue').textContent = isNaN(humid) ? '—' : humid.toFixed(1);
+    document.getElementById('lightValue').textContent = isNaN(light) ? '—' : light;
+ 
+    setBar('tempBar', (temp / 50) * 100);
+    setBar('humidBar', humid);
+    setBar('lightBar', (light / 4095) * 100);
+ 
+    ['cardTemp', 'cardHumid', 'cardLight'].forEach(id => {
+      document.getElementById(id).classList.add('active');
+    });
+ 
+    const motionEl = document.getElementById('motionIndicator');
+    const motionText = document.getElementById('motionText');
+    motionEl.classList.toggle('detected', motion);
+    motionText.textContent = motion ? 'DETECTED' : 'CLEAR';
+ 
+    const timeLabel = formatTime(ts);
+    document.getElementById('lastUpdate').textContent = timeLabel;
+    document.getElementById('lastUpdate').title = ts;
+ 
+    if (!isNaN(temp) && !isNaN(humid) && !isNaN(light)) {
+      pushHistory(timeLabel, temp, humid, light);
+    }
+ 
+    // Sync LED state from backend (non-blocking)
+    if (data.led_state !== undefined) {
+      const backendLED = data.led_state === true || data.led_state === 'on' || data.led_state === 1;
+      if (!ledTogglePending) setLEDUI(backendLED);
+    }
+ 
+    setOnline(true);
+    document.getElementById('fetchStatus').textContent = `Last sync: ${timeLabel}`;
+  } catch (err) {
+    setOnline(false);
+    document.getElementById('fetchStatus').textContent = `Error: ${err.message}`;
+    console.warn('Fetch error:', err);
+  }
+}
+ 
+// ── LED toggle ────────────────────────────────────────────
+async function toggleLED() {
+  if (ledTogglePending) return;
+ 
+  ledTogglePending = true;
+  const btn = document.getElementById('ledToggleBtn');
+  btn.classList.add('loading');
+  setFeedback('Sending command…');
+ 
+  const newState = !ledState;
+ 
+  try {
+    const res = await fetch(`${API_BASE}/api/led`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ state: newState ? 'on' : 'off' }),
+      signal: AbortSignal.timeout(6000),
+    });
+ 
+    if (!res.ok) throw new Error(`Server returned ${res.status}`);
+    const data = await res.json();
+ 
+    const confirmed = data.led_state === 'on' || data.led_state === true || data.led_state === 1;
+    setLEDUI(confirmed);
+    setFeedback(`Command sent · ESP32 will sync shortly`, 'success');
+    setTimeout(() => setFeedback(''), 4000);
+  } catch (err) {
+    setFeedback(`Failed: ${err.message}`, 'error');
+    setTimeout(() => setFeedback(''), 5000);
+  } finally {
+    ledTogglePending = false;
+    btn.classList.remove('loading');
+  }
+}
+ 
+// ── Boot ──────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  initChart();
+  fetchSensorData();
+  setInterval(fetchSensorData, POLL_INTERVAL);
+});
