@@ -16,9 +16,9 @@
   --accent-led-on: #b8e86e;
   --accent-led-off: #444;
   --accent-motion: #e05a5a;
-  --mono: 'Space Mono', monospace;
-  --sans: 'DM Sans', sans-serif;
-  --radius: 4px;
+  --mono: 'Manrope', sans-serif;
+  --sans: 'Manrope', sans-serif;
+  --radius: 14px;
 }
 
 html { font-size: 16px; }
@@ -40,7 +40,7 @@ body {
   background-size: 200px 200px;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.6;
+  opacity: 0.45;
 }
 
 /* ── Header ───────────────────────────────────────────── */
@@ -48,8 +48,8 @@ header {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: rgba(13, 13, 13, 0.92);
-  backdrop-filter: blur(8px);
+  background: rgba(13, 13, 13, 0.88);
+  backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--border);
   padding: 0 1.5rem;
 }
@@ -57,7 +57,7 @@ header {
 .header-inner {
   max-width: 960px;
   margin: 0 auto;
-  height: 56px;
+  height: 58px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -80,19 +80,20 @@ header {
 
 .logo-dot.online {
   background: var(--accent-led-on);
-  box-shadow: 0 0 8px var(--accent-led-on);
+  box-shadow: 0 0 10px var(--accent-led-on);
   animation: pulse-dot 2s ease-in-out infinite;
 }
 
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  50% { opacity: 0.55; }
 }
 
 .logo-text {
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.12em;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   color: var(--text);
 }
 
@@ -103,26 +104,29 @@ header {
 }
 
 .chip {
-  font-family: var(--mono);
+  font-family: var(--sans);
   font-size: 10px;
-  letter-spacing: 0.1em;
-  padding: 3px 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 5px 11px;
   border: 1px solid var(--border2);
-  border-radius: var(--radius);
+  border-radius: 999px;
   color: var(--text3);
   transition: all 0.4s;
 }
 
 .chip.online {
   color: var(--accent-led-on);
-  border-color: var(--accent-led-on);
+  border-color: rgba(184, 232, 110, 0.7);
+  background: rgba(184, 232, 110, 0.08);
 }
 
 .timestamp {
-  font-family: var(--mono);
-  font-size: 10px;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
   color: var(--text3);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
 }
 
 /* ── Main Layout ──────────────────────────────────────── */
@@ -139,13 +143,22 @@ main {
 
 /* ── Cards ────────────────────────────────────────────── */
 .card {
-  background: var(--bg2);
+  background: linear-gradient(180deg, #161616 0%, #121212 100%);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.25rem 1.5rem;
   position: relative;
   overflow: hidden;
-  transition: border-color 0.3s;
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border2);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
 }
 
 .card::before {
@@ -164,24 +177,25 @@ main {
 .card.active::before { opacity: 1; }
 
 .card-label {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.18em;
-  color: var(--text3);
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #8a8a8a;
   margin-bottom: 0.75rem;
 }
 
 .card-value {
   display: flex;
   align-items: baseline;
-  gap: 4px;
+  gap: 5px;
   margin-bottom: 1rem;
 }
 
 .card-value span:first-child {
-  font-family: var(--mono);
-  font-size: 2.4rem;
-  font-weight: 700;
+  font-family: var(--sans);
+  font-size: 3rem;
+  font-weight: 800;
   line-height: 1;
   transition: color 0.4s;
 }
@@ -191,23 +205,24 @@ main {
 .card--light .card-value span:first-child { color: var(--accent-light); }
 
 .card-unit {
-  font-family: var(--mono);
+  font-family: var(--sans);
   font-size: 13px;
+  font-weight: 600;
   color: var(--text3);
 }
 
 .card-bar {
-  height: 3px;
+  height: 4px;
   background: var(--border);
-  border-radius: 2px;
+  border-radius: 999px;
   overflow: hidden;
-  margin-bottom: 6px;
+  margin-bottom: 7px;
 }
 
 .card-bar-fill {
   height: 100%;
   width: 0%;
-  border-radius: 2px;
+  border-radius: 999px;
   transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -218,10 +233,11 @@ main {
 .card-range {
   display: flex;
   justify-content: space-between;
-  font-family: var(--mono);
-  font-size: 9px;
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 500;
   color: var(--text3);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
 }
 
 /* ── Grid ─────────────────────────────────────────────── */
@@ -279,9 +295,10 @@ main {
 }
 
 .motion-text {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
   color: var(--text3);
   position: relative;
   z-index: 1;
@@ -306,8 +323,8 @@ main {
 }
 
 .led-orb {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   background: var(--accent-led-off);
   border: 2px solid var(--border2);
@@ -318,7 +335,7 @@ main {
 .led-orb.on {
   background: var(--accent-led-on);
   border-color: var(--accent-led-on);
-  box-shadow: 0 0 20px rgba(184, 232, 110, 0.5);
+  box-shadow: 0 0 22px rgba(184, 232, 110, 0.55);
   animation: orb-breathe 2s ease-in-out infinite;
 }
 
@@ -335,9 +352,9 @@ main {
 }
 
 .led-status {
-  font-family: var(--mono);
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-family: var(--sans);
+  font-size: 1.5rem;
+  font-weight: 800;
   color: var(--text3);
   transition: color 0.4s;
 }
@@ -347,19 +364,21 @@ main {
 .led-sub {
   font-size: 11px;
   color: var(--text3);
-  font-family: var(--mono);
+  font-family: var(--sans);
+  font-weight: 500;
 }
 
 .led-btn {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  padding: 10px 18px;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 11px 20px;
   border: 1px solid var(--border2);
-  background: transparent;
+  background: rgba(255, 255, 255, 0.02);
   color: var(--text);
   cursor: pointer;
-  border-radius: var(--radius);
+  border-radius: 999px;
   transition: all 0.2s;
   white-space: nowrap;
 }
@@ -367,6 +386,7 @@ main {
 .led-btn:hover {
   background: var(--bg3);
   border-color: var(--text2);
+  transform: translateY(-1px);
 }
 
 .led-btn:active { transform: scale(0.97); }
@@ -377,16 +397,18 @@ main {
 }
 
 .led-btn.led-on-state {
-  border-color: var(--accent-led-on);
+  border-color: rgba(184, 232, 110, 0.7);
   color: var(--accent-led-on);
+  background: rgba(184, 232, 110, 0.08);
 }
 
 .led-feedback {
-  font-family: var(--mono);
-  font-size: 10px;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
   color: var(--text3);
   min-height: 14px;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
   transition: color 0.3s;
 }
 
@@ -395,7 +417,7 @@ main {
 
 /* ── History Chart ────────────────────────────────────── */
 .history-section {
-  background: var(--bg2);
+  background: linear-gradient(180deg, #161616 0%, #121212 100%);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.25rem 1.5rem;
@@ -409,14 +431,16 @@ main {
 }
 
 .history-title {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.18em;
-  color: var(--text3);
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #8a8a8a;
 }
 
 .history-sub {
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 500;
   color: var(--text3);
 }
 
@@ -432,9 +456,10 @@ footer {
   padding: 1rem 1.5rem 2rem;
   display: flex;
   justify-content: space-between;
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.1em;
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   color: var(--text3);
   position: relative;
   z-index: 1;
@@ -445,7 +470,7 @@ footer {
   .grid-primary { grid-template-columns: 1fr; }
   .grid-secondary { grid-template-columns: 1fr; }
 
-  .card-value span:first-child { font-size: 1.8rem; }
+  .card-value span:first-child { font-size: 2.2rem; }
 
   .led-control { flex-wrap: wrap; }
   .led-btn { width: 100%; text-align: center; }
@@ -456,6 +481,20 @@ footer {
 @media (max-width: 480px) {
   main { padding: 1rem; }
   header { padding: 0 1rem; }
+
+  .header-inner {
+    height: auto;
+    min-height: 58px;
+    padding: 10px 0;
+    gap: 10px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .header-meta {
+    width: 100%;
+    justify-content: space-between;
+  }
 }
 
 /* ── Loading shimmer ──────────────────────────────────── */
