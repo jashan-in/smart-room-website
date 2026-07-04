@@ -1,4 +1,4 @@
-const API_BASE = 'https://backend-railway-production-298d.up.railway.app';
+const API_BASE = 'https://web-production-b5ec9.up.railway.app';
 const POLL_INTERVAL = 3000;
 const MAX_HISTORY = 20;
 const ESP32_OFFLINE_AFTER_SECONDS = 15;
