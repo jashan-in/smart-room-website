@@ -87,6 +87,20 @@
         </div>
         <div class="led-feedback" id="ledFeedback"></div>
       </div>
+
+      <div class="card card--servo">
+        <div class="card-label">SERVO CONTROL</div>
+        <div class="led-control">
+          <div class="led-info">
+            <span class="led-status" id="servoStatusText">CLOSED</span>
+            <span class="led-sub">Servo motor on GPIO 21</span>
+          </div>
+          <button class="led-btn" id="servoToggleBtn" onclick="toggleServo()">
+            <span id="servoBtnLabel">OPEN</span>
+          </button>
+        </div>
+        <div class="led-feedback" id="servoFeedback"></div>
+      </div>
     </section>
 
     <section class="history-section">

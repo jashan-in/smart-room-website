@@ -5,10 +5,13 @@ const ESP32_OFFLINE_AFTER_SECONDS = 15;
 
 let ledState = false;
 let ledTogglePending = false;
+
+let servoState = false;
+let servoTogglePending = false;
+
 let history = { labels: [], temp: [], humid: [], light: [] };
 let chart = null;
 
-// ── Chart init ────────────────────────────────────────────
 function initChart() {
   const ctx = document.getElementById('historyChart').getContext('2d');
 
@@ -52,16 +55,6 @@ function initChart() {
             padding: 16,
           },
         },
-        tooltip: {
-          backgroundColor: '#1c1c1c',
-          borderColor: '#2a2a2a',
-          borderWidth: 1,
-          titleColor: '#888',
-          bodyColor: '#e8e4dc',
-          titleFont: { family: 'Space Mono', size: 9 },
-          bodyFont: { family: 'Space Mono', size: 10 },
-          padding: 10,
-        },
       },
       scales: {
         x: {
@@ -104,7 +97,6 @@ function pushHistory(label, temp, humid, light) {
   chart.update('none');
 }
 
-// ── DOM helpers ───────────────────────────────────────────
 function setBar(id, pct) {
   document.getElementById(id).style.width =
     Math.min(100, Math.max(0, pct)) + '%';
@@ -125,8 +117,27 @@ function setLEDUI(isOn) {
   btn.classList.toggle('led-on-state', isOn);
 }
 
+function setServoUI(isOpen) {
+  servoState = isOpen;
+
+  const statusText = document.getElementById('servoStatusText');
+  const btnLabel = document.getElementById('servoBtnLabel');
+  const btn = document.getElementById('servoToggleBtn');
+
+  statusText.textContent = isOpen ? 'OPEN' : 'CLOSED';
+  statusText.classList.toggle('on', isOpen);
+  btnLabel.textContent = isOpen ? 'CLOSE' : 'OPEN';
+  btn.classList.toggle('led-on-state', isOpen);
+}
+
 function setFeedback(msg, type = '') {
   const el = document.getElementById('ledFeedback');
+  el.textContent = msg;
+  el.className = 'led-feedback ' + type;
+}
+
+function setServoFeedback(msg, type = '') {
+  const el = document.getElementById('servoFeedback');
   el.textContent = msg;
   el.className = 'led-feedback ' + type;
 }
@@ -165,7 +176,6 @@ function setOnline(online) {
   chip.textContent = online ? 'ONLINE' : 'OFFLINE';
 }
 
-// ── Sensor fetch ──────────────────────────────────────────
 async function fetchSensorData() {
   try {
     const res = await fetch(`${API_BASE}/api/latest`, {
@@ -220,7 +230,6 @@ async function fetchSensorData() {
       pushHistory(timeLabel, temp, humid, light);
     }
 
-    // Sync LED state from backend
     if (data.led_state !== undefined) {
       const backendLED =
         data.led_state === true ||
@@ -228,6 +237,12 @@ async function fetchSensorData() {
         data.led_state === 1;
 
       if (!ledTogglePending) setLEDUI(backendLED);
+    }
+
+    if (data.servo_state !== undefined) {
+      const backendServoOpen = data.servo_state === 'open';
+
+      if (!servoTogglePending) setServoUI(backendServoOpen);
     }
 
     setOnline(espOnline);
@@ -242,7 +257,6 @@ async function fetchSensorData() {
   }
 }
 
-// ── LED toggle ────────────────────────────────────────────
 async function toggleLED() {
   if (ledTogglePending) return;
 
@@ -284,7 +298,44 @@ async function toggleLED() {
   }
 }
 
-// ── Boot ──────────────────────────────────────────────────
+async function toggleServo() {
+  if (servoTogglePending) return;
+
+  servoTogglePending = true;
+
+  const btn = document.getElementById('servoToggleBtn');
+  btn.classList.add('loading');
+  setServoFeedback('Sending command…');
+
+  const newState = !servoState;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/servo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ state: newState ? 'open' : 'closed' }),
+      signal: AbortSignal.timeout(6000),
+    });
+
+    if (!res.ok) throw new Error(`Server returned ${res.status}`);
+
+    const data = await res.json();
+
+    const confirmed = data.servo_state === 'open';
+
+    setServoUI(confirmed);
+    setServoFeedback('Command sent · ESP32 will sync shortly', 'success');
+
+    setTimeout(() => setServoFeedback(''), 4000);
+  } catch (err) {
+    setServoFeedback(`Failed: ${err.message}`, 'error');
+    setTimeout(() => setServoFeedback(''), 5000);
+  } finally {
+    servoTogglePending = false;
+    btn.classList.remove('loading');
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initChart();
   fetchSensorData();
